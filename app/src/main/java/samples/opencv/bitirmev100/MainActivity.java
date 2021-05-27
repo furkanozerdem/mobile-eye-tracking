@@ -88,7 +88,6 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
     private MenuItem             mItemSwitchCamera = null;
     File eyecascFile;
     TextView resultText;
-
     SharedArea sharedArea;
 
     CascadeClassifier eyeDetector;
