@@ -1,0 +1,7 @@
+Executable : C:\Users\Furkan\AppData\Local\Android\Sdk\cmake\3.10.2.4988404\bin\ninja.exe
+arguments : 
+-C
+C:\Users\Furkan\AndroidStudioProjects\Bitirmev100\openCV\.cxx\cmake\debug\x86
+opencv_jni_shared
+jvmArgs : 
+

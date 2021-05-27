@@ -1,0 +1,7 @@
+[
+{
+  "directory": "C:/Users/Furkan/AndroidStudioProjects/Bitirmev100/openCV/.cxx/cmake/release/arm64-v8a",
+  "command": "C:\\Users\\Furkan\\AppData\\Local\\Android\\Sdk\\ndk\\21.1.6352462\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang++.exe --target=aarch64-none-linux-android23 --gcc-toolchain=C:/Users/Furkan/AppData/Local/Android/Sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/windows-x86_64 --sysroot=C:/Users/Furkan/AppData/Local/Android/Sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/windows-x86_64/sysroot    -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -O2 -DNDEBUG  -fPIC   -o CMakeFiles\\opencv_jni_shared.dir\\dummy.cpp.o -c C:\\Users\\Furkan\\AndroidStudioProjects\\Bitirmev100\\openCV\\libcxx_helper\\dummy.cpp",
+  "file": "C:\\Users\\Furkan\\AndroidStudioProjects\\Bitirmev100\\openCV\\libcxx_helper\\dummy.cpp"
+}
+]

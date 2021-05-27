@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Bitirmev100.iml" filepath="$PROJECT_DIR$/.idea/modules/Bitirmev100.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Bitirmev100.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Bitirmev100.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/openCV/Bitirmev100.openCV.iml" filepath="$PROJECT_DIR$/.idea/modules/openCV/Bitirmev100.openCV.iml" />
+    </modules>
+  </component>
+</project>

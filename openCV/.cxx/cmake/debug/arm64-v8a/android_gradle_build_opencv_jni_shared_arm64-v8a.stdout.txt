@@ -1,0 +1,2 @@
+ninja: Entering directory `C:\Users\Furkan\AndroidStudioProjects\Bitirmev100\openCV\.cxx\cmake\debug\arm64-v8a'
+ninja: no work to do.
