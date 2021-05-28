@@ -144,7 +144,7 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
                         cascadeDir.delete();
                     mOpenCvCameraView.enableView();
                 }
-                    break;
+                break;
 
                 default: {
                     super.onManagerConnected(status);
@@ -179,6 +179,7 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
 
         } else { //eğer izin verilmişse
             Log.d("TAG : ", "Permissions granted");
+            Toast.makeText(getApplicationContext(),"izin verildi",Toast.LENGTH_LONG).show();
             mOpenCvCameraView.setCameraPermissionGranted(); //izin verildiğini nesneye belirt.
             if(OpenCVLoader.initDebug()) {
                 baseLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
@@ -233,18 +234,24 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
     @RequiresApi(api = Build.VERSION_CODES.N)
     public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
 
+        Mat mat1 = new Mat();
+        Mat gray = new Mat();
 
-                mRgba = inputFrame.rgba();
-                Mat gray = inputFrame.gray(); //input frame with grayscale
-                Mat threshold = new Mat();
+        Core.flip(inputFrame.gray().t(), mat1, -1);
+        Imgproc.resize(mat1, gray, inputFrame.gray().size());
 
-                // gray = mRgba;
-                Mat area = new Mat();
-                Rect pupilRect;
+        mat1.release();
+        inputFrame.gray().release();
+        Mat threshold = new Mat();
+
+        // gray = mRgba;
+        Mat area = new Mat();
+        Rect pupilRect;
 
 
-                Mat eyeRectangle = new Mat(); //eye area
-                Core.flip(gray.t(), gray, 0); //mRgba.t() is the transpose
+        Mat eyeRectangle = new Mat(); //eye area
+
+
 
 
         Imgproc.putText(gray,"Look at : " + ((rand==0) ? "RIGHT":"LEFT") ,new Point(gray.width()/2,gray.height()/2),Imgproc.FONT_HERSHEY_COMPLEX,1,new Scalar(255,0,0),2);
@@ -252,99 +259,99 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
 
 
         Rect r = new Rect(new Point(gray.width()/15,(gray.height()/3)+gray.height()/15), new Point(14*gray.width()/15,gray.height()/15));
-                Imgproc.rectangle(gray,r,new Scalar(255,255,255),3);
-                Mat findEyeArea = gray.submat(r);
+        Imgproc.rectangle(gray,r,new Scalar(255,255,255),3);
+        Mat findEyeArea = gray.submat(r);
 
-                Imgproc.medianBlur(gray,gray,5);
-                // Imgproc.threshold(gray, threshold, 40,255,Imgproc.THRESH_BINARY_INV);
+        Imgproc.medianBlur(gray,gray,5);
+        // Imgproc.threshold(gray, threshold, 40,255,Imgproc.THRESH_BINARY_INV);
 
-                MatOfRect eyeDetections = new MatOfRect();
-                eyeDetector.detectMultiScale(findEyeArea,eyeDetections);
+        MatOfRect eyeDetections = new MatOfRect();
+        eyeDetector.detectMultiScale(findEyeArea,eyeDetections);
 
-                if(eyeDetections.toArray().length !=0 ) { //eye detected, rectangle will be drawn
-                    System.out.println("eyes detected.");
+        if(eyeDetections.toArray().length !=0 ) { //eye detected, rectangle will be drawn
+            System.out.println("eyes detected.");
 
-                    for (Rect rect : eyeDetections.toArray()) {
-                        if(rect.height < 50) break;
-                        //the area that will be try to find circular object
-                        Imgproc.rectangle(findEyeArea, new Point(rect.x, rect.y),
-                                new Point(rect.x + rect.width, rect.y + rect.height),
-                                new Scalar(255, 255, 0), 5);
-                        //Draw crosslines on that rectangle area.---
-                        //Draw crosslines on that rectangle area.---
+            for (Rect rect : eyeDetections.toArray()) {
+                if(rect.height < 50) break;
+                //the area that will be try to find circular object
+                Imgproc.rectangle(findEyeArea, new Point(rect.x, rect.y),
+                        new Point(rect.x + rect.width, rect.y + rect.height),
+                        new Scalar(255, 255, 0), 5);
+                //Draw crosslines on that rectangle area.---
+                //Draw crosslines on that rectangle area.---
 
-                        eyeRectangle = findEyeArea .submat(rect); //- Haar cascade ile bulunan gözleri içeren alan (İşlemler bu alan üzeridnen yapılacak)
-                        //Imgproc.cvtColor(eyeRectangle,eyeRectangle,Imgproc.COLOR_RGBA2GRAY);
+                eyeRectangle = findEyeArea .submat(rect); //- Haar cascade ile bulunan gözleri içeren alan (İşlemler bu alan üzeridnen yapılacak)
+                //Imgproc.cvtColor(eyeRectangle,eyeRectangle,Imgproc.COLOR_RGBA2GRAY);
 
-                        // Imgproc.threshold(eyeRectangle,threshold,50,255,Imgproc.THRESH_BINARY_INV); //bu alana threshold işlemi uygulanır. (Göz bebeğini, gözün yuvarlak kısmından ayırt etmek için)
-                        // Imgproc.adaptiveThreshold(eyeRectangle,threshold,255,Imgproc.ADAPTIVE_THRESH_MEAN_C,Imgproc.THRESH_BINARY_INV,15,40);
+                // Imgproc.threshold(eyeRectangle,threshold,50,255,Imgproc.THRESH_BINARY_INV); //bu alana threshold işlemi uygulanır. (Göz bebeğini, gözün yuvarlak kısmından ayırt etmek için)
+                // Imgproc.adaptiveThreshold(eyeRectangle,threshold,255,Imgproc.ADAPTIVE_THRESH_MEAN_C,Imgproc.THRESH_BINARY_INV,15,40);
 
 
-                        int bestTH = findBestThreshold(eyeRectangle);
-                        String thresholdString = Integer.toString(bestTH);
+                int bestTH = findBestThreshold(eyeRectangle);
+                String thresholdString = Integer.toString(bestTH);
 
-                        Imgproc.threshold(eyeRectangle,threshold,bestTH,255,Imgproc.THRESH_BINARY_INV);
-                        Imgproc.putText(gray,thresholdString,new Point(rect.x,1.5*rect.y),Imgproc.FONT_HERSHEY_PLAIN,3,new Scalar(255,255,255),4);
+                Imgproc.threshold(eyeRectangle,threshold,bestTH,255,Imgproc.THRESH_BINARY_INV);
+                Imgproc.putText(gray,thresholdString,new Point(rect.x,1.5*rect.y),Imgproc.FONT_HERSHEY_PLAIN,3,new Scalar(255,255,255),4);
 
-                        List<MatOfPoint> contours = new ArrayList<>(); //Bu bölgeyi temsil eden bir Liste elemanı tutulur.
-                        Imgproc.findContours(threshold, contours, area, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE); //değerler bu elemana aktarılır. contours değişkeni, threshold değerine bağlı olarak ayırt edilmiş alanları temsil eder.
-                        //contours değeri eleman içermek zorunda değildir. Bu alan içindeki tüm pixel değerleri th değerinden küçükse veya büyükse contours değeri 0 dır.
-                        //th değerinden büyük ve küçük değerler bir arada bu alan içinde ise contours değişkeni 0 dan farklıdır.
+                List<MatOfPoint> contours = new ArrayList<>(); //Bu bölgeyi temsil eden bir Liste elemanı tutulur.
+                Imgproc.findContours(threshold, contours, area, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE); //değerler bu elemana aktarılır. contours değişkeni, threshold değerine bağlı olarak ayırt edilmiş alanları temsil eder.
+                //contours değeri eleman içermek zorunda değildir. Bu alan içindeki tüm pixel değerleri th değerinden küçükse veya büyükse contours değeri 0 dır.
+                //th değerinden büyük ve küçük değerler bir arada bu alan içinde ise contours değişkeni 0 dan farklıdır.
 
-                        //Sorting Side
-                        Collections.sort(contours, new Comparator<MatOfPoint>() {
-                            @Override
-                            public int compare(MatOfPoint o1, MatOfPoint o2) {
-                                Rect rect1 = Imgproc.boundingRect(o1);
-                                Rect rect2 = Imgproc.boundingRect(o2);
+                //Sorting Side
+                Collections.sort(contours, new Comparator<MatOfPoint>() {
+                    @Override
+                    public int compare(MatOfPoint o1, MatOfPoint o2) {
+                        Rect rect1 = Imgproc.boundingRect(o1);
+                        Rect rect2 = Imgproc.boundingRect(o2);
 
-                                return  Integer.valueOf((int) rect2.area()).compareTo((int) rect1.area());
-                            }
-                        });//threshold değerinden sonra bulunan alanlar içinden en büyüğünü bulmak için sıralama kullanılır.
-
-                        if(contours.size() != 0) { //eğer threshold değerine bağlı olarak ayırt edilebilen bir alan bulunmuşsa
-                            MatOfPoint2f contour2f = new MatOfPoint2f(contours.get(0).toArray() ); //kullanılmış sıralama algoritması en büyük alanlı dikdörtgeni listenin başına getirir. Bu yüzden listenin ilk elemanı ekrana çizilir.
-                            MatOfPoint points = new MatOfPoint(contour2f.toArray() );
-                            pupilRect = Imgproc.boundingRect(points);
-                            Imgproc.rectangle(eyeRectangle, new Point(pupilRect.x, pupilRect.y), new Point(pupilRect.x + pupilRect.width, pupilRect.y + pupilRect.height), new Scalar(255, 0, 0, 255), 1);
-                            Point centerPoint = new Point((pupilRect.x+pupilRect.width)/2,(pupilRect.y+pupilRect.height)/2);
-
-                            int yon = yonBul(centerPoint,rect);
-
-                            switch (yon) {
-                                case 0:
-                                    Imgproc.putText(gray,"SAG",new Point(rect.x,rect.y),Imgproc.FONT_HERSHEY_PLAIN,3,new Scalar(255,255,255),4);
-                                    break;
-                                case 1:
-                                    Imgproc.putText(gray,"SOL",new Point(rect.x,rect.y),Imgproc.FONT_HERSHEY_PLAIN,3,new Scalar(255,255,255),4);
-                                    break;
-                                case 2:
-                                    Imgproc.putText(gray,"ORTA",new Point(rect.x,rect.y),Imgproc.FONT_HERSHEY_PLAIN,3,new Scalar(255,255,255),4);
-                                    break;
-
-                                default:
-                            }
-
-                            if(yon == rand)
-                            {
-                            randomInteger = new Random();
-                            rand = randomInteger.nextInt(2);
-
-                            Point p = new Point();
-                            p.x = gray.width()/2;
-                            p.y = gray.height()/2;
-                                score++;
-                            }
-
-                        }
+                        return  Integer.valueOf((int) rect2.area()).compareTo((int) rect1.area());
                     }
+                });//threshold değerinden sonra bulunan alanlar içinden en büyüğünü bulmak için sıralama kullanılır.
+
+                if(contours.size() != 0) { //eğer threshold değerine bağlı olarak ayırt edilebilen bir alan bulunmuşsa
+                    MatOfPoint2f contour2f = new MatOfPoint2f(contours.get(0).toArray() ); //kullanılmış sıralama algoritması en büyük alanlı dikdörtgeni listenin başına getirir. Bu yüzden listenin ilk elemanı ekrana çizilir.
+                    MatOfPoint points = new MatOfPoint(contour2f.toArray() );
+                    pupilRect = Imgproc.boundingRect(points);
+                    Imgproc.rectangle(eyeRectangle, new Point(pupilRect.x, pupilRect.y), new Point(pupilRect.x + pupilRect.width, pupilRect.y + pupilRect.height), new Scalar(255, 0, 0, 255), 1);
+                    Point centerPoint = new Point((pupilRect.x+pupilRect.width)/2,(pupilRect.y+pupilRect.height)/2);
+
+                    int yon = yonBul(centerPoint,rect);
+
+                    switch (yon) {
+                        case 0:
+                            Imgproc.putText(gray,"SAG",new Point(rect.x,rect.y),Imgproc.FONT_HERSHEY_PLAIN,3,new Scalar(255,255,255),4);
+                            break;
+                        case 1:
+                            Imgproc.putText(gray,"SOL",new Point(rect.x,rect.y),Imgproc.FONT_HERSHEY_PLAIN,3,new Scalar(255,255,255),4);
+                            break;
+                        case 2:
+                            Imgproc.putText(gray,"ORTA",new Point(rect.x,rect.y),Imgproc.FONT_HERSHEY_PLAIN,3,new Scalar(255,255,255),4);
+                            break;
+
+                        default:
+                    }
+
+                    if(yon == rand)
+                    {
+                        randomInteger = new Random();
+                        rand = randomInteger.nextInt(2);
+
+                        Point p = new Point();
+                        p.x = gray.width()/2;
+                        p.y = gray.height()/2;
+                        score++;
+                    }
+
                 }
+            }
+        }
 
-                Point scorePoint = new Point();
-                scorePoint.x = gray.width() / 15;
-                scorePoint.y = gray.height()/10;
+        Point scorePoint = new Point();
+        scorePoint.x = gray.width() / 15;
+        scorePoint.y = gray.height()/10;
 
-          Imgproc.putText(gray,"Your score : " + score,scorePoint,Imgproc.FONT_HERSHEY_COMPLEX,2,new Scalar(255,0,0),4);
+        Imgproc.putText(gray,"Your score : " + score,scorePoint,Imgproc.FONT_HERSHEY_COMPLEX,2,new Scalar(255,0,0),4);
 
         return gray;
 
@@ -353,14 +360,14 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
     int yonBul(Point p, Rect rect) {
         double cnt = (p.x / rect.width);
         int result;
-       if(cnt < 0.2) {
-            result =  0;
+        if(cnt < 0.2) {
+            result =  1;
         }
         else if(cnt > 0.2 && cnt < 0.35){
             result = 2;
         }
         else {
-            result = 1;
+            result = 0;
         }
 
 
