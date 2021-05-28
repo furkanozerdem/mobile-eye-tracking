@@ -5,11 +5,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.solver.widgets.Rectangle;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Camera;
 import android.os.Build;
@@ -86,14 +89,12 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
     private CameraBridgeViewBase mOpenCvCameraView;
     File eyecascFile;
     TextView resultText;
-    SharedArea sharedArea;
-
     CascadeClassifier eyeDetector;
-    private Mat mRgba, mGray;
     int statringFrameIndex;
     int rand = 0;
     int score = 0;
     Random randomInteger;
+    int permissionCheck = 0;
 
 
 
@@ -167,7 +168,7 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
 
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.tutorial1_activity_java_surface_view); //activity_main (görüntü dosyasında bulunan objeyi bu değişken üzerinden tanıtıyoruz)
         mOpenCvCameraView.setCameraIndex(1); //Ön Kamera
-        sharedArea = new SharedArea();
+
         resultText = findViewById(R.id.resultText);
 
 
@@ -176,6 +177,7 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
                 != PackageManager.PERMISSION_GRANTED) {
             // Kullanıcıdan izin alma komutu burada olacak.
 
+            requestCameraPermission();
 
         } else { //eğer izin verilmişse
             Log.d("TAG : ", "Permissions granted");
@@ -420,6 +422,48 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
         }
 
         return 50;
+    }
+
+    public  void requestCameraPermission() {
+        if(ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.CAMERA)) {
+            new AlertDialog.Builder(this)
+                    .setTitle("İzin")
+                    .setMessage("Göz Takibi Programı İçin Kamera İzni Gereklidir.")
+                    .setPositiveButton("İzin Ver", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            ActivityCompat.requestPermissions(MainActivity.this,new String[] {Manifest.permission.CAMERA},1);
+                        }
+                    })
+                    .setNegativeButton("Red", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+
+                        }
+                    }).create().show();
+
+
+        } else {
+            ActivityCompat.requestPermissions(this,new String[] {Manifest.permission.CAMERA},1);
+        }
+
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permission, @NonNull int[] grantResult) {
+        if(requestCode == permissionCheck) {
+            if(grantResult.length>0 && grantResult[0] == PackageManager.PERMISSION_GRANTED ) {
+                //izin verildi.
+                Toast.makeText(this,"İzin Verildi",Toast.LENGTH_LONG).show();
+
+          }
+            else {
+                Toast.makeText(this,"İzin Gerekli",Toast.LENGTH_LONG).show();
+            }
+
+
+        }
+
     }
 
 
